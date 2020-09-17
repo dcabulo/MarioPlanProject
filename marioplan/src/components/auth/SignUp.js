@@ -1,13 +1,14 @@
 import React, { Component } from "react";
+import { Redirect } from "react-router-dom";
+import { connect } from "react-redux";
+import { signUp } from "../../store/actions/authActions";
 
 class SingUp extends Component {
   state = {
     email: "",
     password: "",
-    firstName:'',
-    lastName:'',
-
-
+    firstName: "",
+    lastName: "",
   };
   handleChange = (e) => {
     this.setState({
@@ -16,9 +17,12 @@ class SingUp extends Component {
   };
   handleSubmit = (e) => {
     e.preventDefault();
+    this.props.signUp(this.state);
     console.log(this.state);
   };
   render() {
+    const { auth, authError } = this.props;
+    if (auth.uid) return <Redirect to="/signin" />;
     return (
       <div className="container">
         <form onSubmit={this.handleSubmit} className="white">
@@ -32,8 +36,8 @@ class SingUp extends Component {
             <input type="password" id="password" onChange={this.handleChange} />
           </div>
           <div className="input-field">
-            <label htmlFor="firsName">First Name</label>
-            <input type="text" id="firsName" onChange={this.handleChange} />
+            <label htmlFor="firstName">First Name</label>
+            <input type="text" id="firstName" onChange={this.handleChange} />
           </div>
           <div className="input-field">
             <label htmlFor="lastName">Last Name</label>
@@ -41,6 +45,9 @@ class SingUp extends Component {
           </div>
           <div className="input-field">
             <button className="btn pink lighten-1 z-depth-0">Sign up</button>
+            <div className="red-text center">
+              {authError ? <p>{authError}</p> : null}
+            </div>
           </div>
         </form>
       </div>
@@ -48,4 +55,17 @@ class SingUp extends Component {
   }
 }
 
-export default SingUp;
+const mapStateToProps = (state) => {
+  return {
+    auth: state.firebase.auth,
+    authError: state.auth.authError,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signUp: (newUser) => dispatch(signUp(newUser)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SingUp);
